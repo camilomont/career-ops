@@ -24,7 +24,13 @@ const CV_PATH          = 'cv.md';
 const RESULTS_PATH     = 'data/applications-log.md';
 
 // Límite de nuevas aplicaciones por ejecución (ya-aplicado no cuenta)
-const MAX_NEW_APPS = 5;
+// Ejecución manual: 10. Para cron automático bajar a 5.
+const MAX_NEW_APPS = process.env.MAX_NEW_APPS ? parseInt(process.env.MAX_NEW_APPS) : 10;
+
+// Si llevamos esta cantidad de skips CONSECUTIVOS sin aplicar a nada, el pool
+// de ofertas relevantes está agotado — paramos aunque no hayamos llegado al cupo.
+// Configurable vía MAX_CONSECUTIVE_SKIPS=N. Default: 40.
+const MAX_CONSECUTIVE_SKIPS = process.env.MAX_CONSECUTIVE_SKIPS ? parseInt(process.env.MAX_CONSECUTIVE_SKIPS) : 40;
 
 // ──────────────────────────────────────────────────────────────────────────────
 // IA
@@ -831,7 +837,22 @@ function isDevJobUrl(url) {
     'programadora-de-ruta',
     'programador-datos',         // analista BI/datos, no desarrollo
     'programador-operario',      // operario de maquinaria
+    'programador-quirurgic',     // programador de turnos quirúrgicos (sector salud)
+    'programadora-quirurgic',    // variante femenino
+    // Pasantías / prácticas — Camilo es tecnólogo titulado, NO es practicante
+    'practicante',               // practicante-en-ingenieria, practicante-de-desarrollo, etc.
+    'aprendiz-',                 // aprendiz SENA (contrato de aprendizaje)
+    // Roles no-software que usan "programador" o "técnico"
+    'maniobras-enel',            // programador de maniobras eléctricas (sector energético)
+    '-de-la-produccion',         // técnico/tecnólogo de producción industrial
+    'logistica-o-progra',        // auxiliares de logística o programación de rutas/turnos
+    'auxiliar-analista',         // auxiliar analista de soporte (no es rol dev)
     // Stack tecnológico incompatible en URL
+    '-abap', 'sap-abap',     // ABAP = programador SAP — no aplica
+    '-kotlin',               // desarrollador-kotlin → Android nativo — no aplica
+    '-ios-', '-ios-swift', '-swift-', // iOS/Swift — no aplica
+    'de-redes', 'redes-y-telecom', 'redes-teleco', // redes/telecomunicaciones — no aplica
+    'lider-emprendedor',     // lider-emprendedor-desarrollador = ventas/emprendimiento
     '-java-',                // desarrollador-backend-java-spring (evita bloquear javascript)
     'java-spring',           // variante sin guión inicial
     'spring-boot',           // Spring Boot = Java exclusivamente
@@ -1568,10 +1589,21 @@ Responde ÚNICAMENTE con el número de índice de la opción correcta (0, 1, 2, 
       matchedRule = 'contrato→fijo/indefinido';
     }
 
-    // ── Fast-path 4: Nivel académico explícito en opciones ──────────────────
-    else if (options.some(o => /tecnol[oó]go|t[eé]cnico|profesional|universitario/i.test(o.label))) {
+    // ── Fast-path 4: Tipo de documento → siempre Cédula de ciudadanía ────────
+    else if (/tipo.*documento|clase.*documento|documento.*identidad|tipo.*id\b/i.test(q)) {
+      selectedValue = options.find(o => /c[eé]dula.*ciudadan|cc\b/i.test(o.label))?.value
+        ?? options.find(o => /c[eé]dula/i.test(o.label))?.value;
+      matchedRule = 'documento→cédula-ciudadanía';
+    }
+
+    // ── Fast-path 5: Nivel académico explícito en opciones ──────────────────
+    // Solo aplica cuando la PREGUNTA es sobre nivel de estudios, no cuando una opción
+    // contiene "técnico" por casualidad (ej: "Soporte técnico / infraestructura")
+    // Usa ?? en vez de || para que value===0 no se trate como falsy
+    else if (/nivel.*acad[eé]mico|nivel.*estudio|grado.*acad|escolaridad|formaci[oó]n.*acad|nivel.*educaci/i.test(q)
+             && options.some(o => /tecnol[oó]go|t[eé]cnico|profesional|universitario/i.test(o.label))) {
       selectedValue = options.find(o => /tecnol[oó]go/i.test(o.label))?.value
-        || options.find(o => /t[eé]cnico/i.test(o.label))?.value;
+        ?? options.find(o => /t[eé]cnico/i.test(o.label))?.value;
       matchedRule = 'nivel-académico→tecnólogo';
     }
 
@@ -2114,8 +2146,9 @@ async function main() {
           return true;
         });
 
-        console.log(`\n[CT] Total ofertas a procesar: ${uniqueJobs.length} (límite: ${MAX_NEW_APPS} nuevas)`);
+        console.log(`\n[CT] Total ofertas a procesar: ${uniqueJobs.length} (límite: ${MAX_NEW_APPS} nuevas, parar tras ${MAX_CONSECUTIVE_SKIPS} skips consecutivos)`);
         let newAppsCount = 0;
+        let consecutiveSkips = 0;
 
         for (let i = 0; i < uniqueJobs.length; i++) {
           const job = uniqueJobs[i];
@@ -2125,6 +2158,11 @@ async function main() {
           if (hash && appliedHashes.has(hash)) {
             console.log(`\n── CT ${i+1}/${uniqueJobs.length} ─ [SKIP pre-check hash] ${job.url.slice(0,70)}`);
             allResults.push({ url: job.url, company: job.company, title: job.title, status: 'already-applied', timestamp: new Date().toISOString(), details: ['Ya aplicado — detectado en pre-check hash'] });
+            consecutiveSkips++;
+            if (consecutiveSkips >= MAX_CONSECUTIVE_SKIPS) {
+              console.log(`\n[CT] ${MAX_CONSECUTIVE_SKIPS} skips consecutivos — pool agotado. Deteniendo.`);
+              break;
+            }
             continue;
           }
 
@@ -2132,6 +2170,11 @@ async function main() {
           if (job.alreadyApplied) {
             console.log(`\n── CT ${i+1}/${uniqueJobs.length} ─ [SKIP tag postulado] ${job.url.slice(0,70)}`);
             allResults.push({ url: job.url, company: job.company, title: job.title, status: 'already-applied', timestamp: new Date().toISOString(), details: ['Ya aplicado — tag .postulated en listado'] });
+            consecutiveSkips++;
+            if (consecutiveSkips >= MAX_CONSECUTIVE_SKIPS) {
+              console.log(`\n[CT] ${MAX_CONSECUTIVE_SKIPS} skips consecutivos — pool agotado. Deteniendo.`);
+              break;
+            }
             continue;
           }
 
@@ -2145,6 +2188,11 @@ async function main() {
           if (!isDevJobUrl(job.url)) {
             console.log(`\n── CT ${i+1}/${uniqueJobs.length} ─ [SKIP perfil] ${job.url.slice(0,80)}`);
             allResults.push({ url: job.url, company: job.company, title: job.title, status: 'skipped', timestamp: new Date().toISOString(), details: ['No coincide con perfil dev'] });
+            consecutiveSkips++;
+            if (consecutiveSkips >= MAX_CONSECUTIVE_SKIPS) {
+              console.log(`\n[CT] ${MAX_CONSECUTIVE_SKIPS} skips consecutivos — pool agotado. Deteniendo.`);
+              break;
+            }
             continue;
           }
 
@@ -2163,10 +2211,19 @@ async function main() {
           result.title   = job.title;
           allResults.push(result);
 
-          // Contar nuevas aplicaciones (no ya-aplicadas, no skipped por antigüedad)
+          // Contar nuevas aplicaciones y gestionar skips consecutivos
           if (!['already-applied', 'too-old', 'skipped'].includes(result.status)) {
+            // Aplicación real → reset skips consecutivos
             newAppsCount++;
+            consecutiveSkips = 0;
             console.log(`[CT] Nuevas aplicaciones: ${newAppsCount}/${MAX_NEW_APPS}`);
+          } else {
+            // Navegamos pero no aplicamos → también cuenta como skip
+            consecutiveSkips++;
+            if (consecutiveSkips >= MAX_CONSECUTIVE_SKIPS) {
+              console.log(`\n[CT] ${MAX_CONSECUTIVE_SKIPS} skips consecutivos — pool agotado. Deteniendo.`);
+              break;
+            }
           }
 
           // Pausa entre aplicaciones para no ser detectado como bot
