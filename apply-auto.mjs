@@ -328,7 +328,8 @@ function guessValue(name = '', placeholder = '', label = '', candidate = {}) {
   if (/last.?name|apellido/.test(k))        return (candidate.full_name || '').split(' ').slice(1).join(' ') || '';
   if (/\bname\b|\bnombre\b/.test(k))        return candidate.full_name || '';
   if (/email|correo/.test(k))               return candidate.email || '';
-  if (/phone|tel[eé]fono|celular|mobile/.test(k)) return candidate.phone || '';
+  if (/a nombre de quien|propietario.*veh[ií]c|veh[ií]c.*nombre/i.test(k)) return 'No aplica.';
+  if (/phone|tel[eé]fono|celular|\bmobile\b/.test(k)) return candidate.phone || '';
   if (/location|ciudad|city|direcci[oó]n/.test(k)) return candidate.location || '';
   if (/linkedin/.test(k))                   return candidate.linkedin || '';
   if (/portfolio|website|sitio.?web|p[aá]gina.?web.?personal|url.?web/.test(k))  return candidate.portfolio_url || '';
@@ -868,6 +869,14 @@ function isDevJobUrl(url) {
     '-cnc', 'operario-programador',
     // Roles de arquitectura — requieren 5+ años de experiencia senior
     'arquitecto-de-software', 'arquitecto-software-', 'arquitectoa-de-software',
+    // Mobile — no tiene Flutter/React Native/Swift
+    'flutter',               // desarrollador Flutter = Android/iOS nativo — no aplica
+    // Data Engineering — no tiene ETL/Informatica/PowerCenter
+    'etl-',                  // ETL developer, herramientas de data warehouse — no aplica
+    // Roles comerciales/marketing disfrazados de "desarrollador"
+    'de-marca',              // desarrollador-de-marca = branding/marketing — no es dev
+    'de-canal',              // desarrollador-de-canal = ventas/distribución — no es dev
+    'de-negocios',           // desarrollador-de-negocios = business dev — no es dev
   ];
   if (hardReject.some(kw => slug.includes(kw))) return false;
   // Aceptar roles de desarrollo
@@ -1490,6 +1499,15 @@ Responde ÚNICAMENTE con el número de índice de la opción correcta (0, 1, 2, 
 
     if (skillSi) {
       return siOption();
+    }
+
+    // 4aa. Acuerdo con condiciones laborales / oferta → siempre Sí
+    if (/de acuerdo|condicion.*laboral|condicion.*cargo|condicion.*trabajo|t[eé]rminos.*contrato|est[aá].*conforme|acepta.*condicion/i.test(q)) {
+      return (
+        options.find(o => /^s[ií]$/i.test(o.label.trim()))
+        || options.find(o => /^s[ií][,\s]/i.test(o.label.trim()))
+        || options[0]
+      );
     }
 
     // 4a. Autorización de datos / privacidad / consentimiento → Sí / Autorizo
