@@ -883,7 +883,7 @@ function isDevJobUrl(url) {
     'agronomico',            // desarrolladora-agronomico = ingeniería agronómica — no es dev
     'agronomo',              // ingeniero-agronomo — no es dev
     // Tech propietaria bancaria — requiere experiencia específica que Camilo no tiene
-    'aso-apx',               // ASO/APX son herramientas internas de BBVA — no aplica
+    'aso-apx', 'asoapx',     // ASO/APX son herramientas internas de BBVA — no aplica (con y sin guión)
     '-osgi',                 // OSGI = framework Java/OSGi bancario — no aplica
   ];
   if (hardReject.some(kw => slug.includes(kw))) return false;
@@ -1478,6 +1478,16 @@ Responde ÚNICAMENTE con el número de índice de la opción correcta (0, 1, 2, 
         options.find(o => /proceso|en curso|aun no|todavía no|estudiando/i.test(o.label))
         || options.find(o => /^no\b/i.test(o.label.trim()))
         || minOption()
+      );
+    }
+
+    // 1b. Nivel de formación / estudios en tecnología → Tecnólogo graduado
+    if (/nivel.*formaci[oó]n|formaci[oó]n.*[aá]rea|nivel.*estudios|nivel.*acad[eé]mico|grado.*acad[eé]mico/i.test(q)) {
+      return (
+        options.find(o => /tecn[oó]logo.*(graduado|titulado)|graduado.*tecn[oó]logo/i.test(o.label))
+        || options.find(o => /tecn[oó]logo/i.test(o.label))
+        || options.find(o => /profesional.*(graduado|titulado)|graduado.*profesional/i.test(o.label))
+        || siOption()
       );
     }
 
