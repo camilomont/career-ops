@@ -329,8 +329,10 @@ function guessValue(name = '', placeholder = '', label = '', candidate = {}) {
   if (/\bname\b|\bnombre\b/.test(k))        return candidate.full_name || '';
   if (/email|correo/.test(k))               return candidate.email || '';
   if (/a nombre de quien|propietario.*veh[ií]c|veh[ií]c.*nombre/i.test(k)) return 'No aplica.';
-  if (/phone|tel[eé]fono|celular|\bmobile\b/.test(k)) return candidate.phone || '';
-  if (/location|ciudad|city|direcci[oó]n/.test(k)) return candidate.location || '';
+  // WhatsApp+location combined: return both; standalone whatsapp/phone → just phone
+  if (/whatsapp.*(?:donde|ciudad|viv)|(?:donde|ciudad|viv).*whatsapp/i.test(k)) return `${candidate.phone || ''} — ${candidate.location || ''}`;
+  if (/phone|tel[eé]fono|celular|whatsapp|\bmobile\b/.test(k)) return candidate.phone || '';
+  if (/location|ciudad|city|direcci[oó]n|donde viv/.test(k)) return candidate.location || '';
   if (/linkedin/.test(k))                   return candidate.linkedin || '';
   if (/portfolio|website|sitio.?web|p[aá]gina.?web.?personal|url.?web/.test(k))  return candidate.portfolio_url || '';
   if (/github/.test(k))                     return candidate.github || '';
@@ -877,6 +879,12 @@ function isDevJobUrl(url) {
     'de-marca',              // desarrollador-de-marca = branding/marketing — no es dev
     'de-canal',              // desarrollador-de-canal = ventas/distribución — no es dev
     'de-negocios',           // desarrollador-de-negocios = business dev — no es dev
+    // Sectores no-tech con "desarrollador" en el título
+    'agronomico',            // desarrolladora-agronomico = ingeniería agronómica — no es dev
+    'agronomo',              // ingeniero-agronomo — no es dev
+    // Tech propietaria bancaria — requiere experiencia específica que Camilo no tiene
+    'aso-apx',               // ASO/APX son herramientas internas de BBVA — no aplica
+    '-osgi',                 // OSGI = framework Java/OSGi bancario — no aplica
   ];
   if (hardReject.some(kw => slug.includes(kw))) return false;
   // Aceptar roles de desarrollo
