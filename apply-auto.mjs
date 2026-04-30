@@ -834,6 +834,8 @@ function isDevJobUrl(url) {
     'de-cuenta-supermercado', // desarrollador de cuenta supermercado = ventas
     // Nivel — candidato es junior (8 meses), rechazar roles senior
     '-senior',               // desarrollador-senior, senior-developer, semi-senior…
+    'senior-',               // senior-react-native-developer (título empieza con Senior)
+    'semisenior',            // desarrollador-nodejs-semisenior (sin guión entre semi y senior)
     // "Programador" en roles NO relacionados con software
     'programador-de-transporte', // planificador logístico
     'programador-de-ruta',       // planificador de rutas
@@ -842,6 +844,9 @@ function isDevJobUrl(url) {
     'programador-operario',      // operario de maquinaria
     'programador-quirurgic',     // programador de turnos quirúrgicos (sector salud)
     'programadora-quirurgic',    // variante femenino
+    'programador-de-linea',      // programador de línea de producción (manufactura)
+    'programador-de-servicios-y-condu', // programador conductor (no software)
+    'radioperador',              // radio operador (no es programador de software)
     // Pasantías / prácticas — Camilo es tecnólogo titulado, NO es practicante
     'practicante',               // practicante-en-ingenieria, practicante-de-desarrollo, etc.
     'aprendiz-',                 // aprendiz SENA (contrato de aprendizaje)
@@ -867,6 +872,7 @@ function isDevJobUrl(url) {
     // Stack .NET — candidato no tiene C#/.NET
     'desarrollador-net-', '-net-medio', '-net-con-', '-net-junior', '-net-senior',
     '-net-angular', // evita bloquear "internet" — solo combos net+algo
+    'net-software',          // net-software-developer (título empieza con .NET)
     // Manufactura CNC — programador de máquinas, no software
     '-cnc', 'operario-programador',
     // Roles de arquitectura — requieren 5+ años de experiencia senior
