@@ -331,7 +331,7 @@ function guessValue(name = '', placeholder = '', label = '', candidate = {}) {
   if (/a nombre de quien|propietario.*veh[ií]c|veh[ií]c.*nombre/i.test(k)) return 'No aplica.';
   // WhatsApp+location combined: return both; standalone whatsapp/phone → just phone
   if (/whatsapp.*(?:donde|ciudad|viv)|(?:donde|ciudad|viv).*whatsapp/i.test(k)) return `${candidate.phone || ''} — ${candidate.location || ''}`;
-  if (/phone|tel[eé]fono|celular|whatsapp|\bmobile\b/.test(k)) return candidate.phone || '';
+  if (/phone|telef[oó]|celular|whatsapp|\bmobile\b|l[ií]nea.*tel|tel.*l[ií]nea/.test(k)) return candidate.phone || '';
   if (/location|ciudad|city|direcci[oó]n|donde viv/.test(k)) return candidate.location || '';
   if (/linkedin/.test(k))                   return candidate.linkedin || '';
   if (/portfolio|website|sitio.?web|p[aá]gina.?web.?personal|url.?web/.test(k))  return candidate.portfolio_url || '';
@@ -844,6 +844,7 @@ function isDevJobUrl(url) {
     'programador-operario',      // operario de maquinaria
     'programador-quirurgic',     // programador de turnos quirúrgicos (sector salud)
     'programadora-quirurgic',    // variante femenino
+    'programador-de-cirugia',    // programador de cirugía (sector salud)
     'programador-de-linea',      // programador de línea de producción (manufactura)
     'programador-de-servicios-y-condu', // programador conductor (no software)
     'programador-de-operaciones', // programador de operaciones logísticas — no es dev
@@ -1153,7 +1154,7 @@ async function fillForm(page, candidate, cvContent) {
       }
       else if (/d[oó]nde vive|localidad|barrio|ubicaci[oó]n/.test(q))
         value = cvLocation;
-      else if (/n[uú]mero de contacto|whatsapp|tel[eé]fono|celular/.test(q))
+      else if (/n[uú]mero de contacto|whatsapp|telef[oó]|celular|l[ií]nea.*tel|tel.*l[ií]nea/.test(q))
         value = candidate.phone || '';
       else if (/aspiraci[oó]n salarial|salario esperado|pretens/.test(q))
         value = 'Entre $2.000.000 y $3.000.000 COP mensuales.';
