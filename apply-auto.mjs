@@ -846,6 +846,7 @@ function isDevJobUrl(url) {
     'programadora-quirurgic',    // variante femenino
     'programador-de-linea',      // programador de línea de producción (manufactura)
     'programador-de-servicios-y-condu', // programador conductor (no software)
+    'programador-de-operaciones', // programador de operaciones logísticas — no es dev
     'radioperador',              // radio operador (no es programador de software)
     // Pasantías / prácticas — Camilo es tecnólogo titulado, NO es practicante
     'practicante',               // practicante-en-ingenieria, practicante-de-desarrollo, etc.
@@ -862,6 +863,7 @@ function isDevJobUrl(url) {
     'de-redes', 'redes-y-telecom', 'redes-teleco', // redes/telecomunicaciones — no aplica
     'lider-emprendedor',     // lider-emprendedor-desarrollador = ventas/emprendimiento
     '-java-',                // desarrollador-backend-java-spring (evita bloquear javascript)
+    'java-developer',        // java-developer-gcp (título empieza con Java)
     'java-spring',           // variante sin guión inicial
     'spring-boot',           // Spring Boot = Java exclusivamente
     // Ofertas exclusivas para personas con discapacidad certificada
@@ -876,7 +878,8 @@ function isDevJobUrl(url) {
     // Manufactura CNC — programador de máquinas, no software
     '-cnc', 'operario-programador',
     // Roles de arquitectura — requieren 5+ años de experiencia senior
-    'arquitecto-de-software', 'arquitecto-software-', 'arquitectoa-de-software',
+    'arquitecto-de-software', 'arquitecto-software-', 'arquitectoa-de-software', 'arquitecto-de-sw',
+    '-arquitecto-',          // desarrollador-y-arquitecto, analista-arquitecto, etc.
     // Mobile — no tiene Flutter/React Native/Swift
     'flutter',               // desarrollador Flutter = Android/iOS nativo — no aplica
     // Data Engineering — no tiene ETL/Informatica/PowerCenter
