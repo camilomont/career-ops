@@ -1178,7 +1178,7 @@ async function fillForm(page, candidate, cvContent) {
         value = 'No tengo experiencia directa con .NET, Blazor o NetMaui. Mi stack principal es JavaScript/TypeScript con Node.js en backend y Angular/React en frontend. Puedo aprender.';
       else if (/experiencia|funciones|cargo|tiempo/.test(q))
         value = `Tengo más de 1 año de experiencia en desarrollo de software. En SERVIMAX desarrollé una página institucional con autenticación, APIs de productos y pasarela de pago (Angular, Node.js, MySQL). En INTELIBPO implementé flujos RPA con n8n y Node.js/NestJS para automatización de cobranza.`;
-      else if (/tecnol[oó]go|t[eé]cnico|estudiante|semestre|ingenier/.test(q))
+      else if (/tecn[oó]logo|t[eé]cnico|estudiante|semestre|ingenier/.test(q))
         value = 'Sí, soy Tecnólogo en Análisis y Desarrollo de Software del SENA (2024) y cuento con formación adicional en Ingeniería de Sistemas.';
       else if (/power.?bi|tableau|qlik|looker|inteligencia.*negocios|business.*intelligen|dashboard.*visual|visualizaci[oó]n.*datos/i.test(q))
         value = 'No tengo experiencia con Power BI ni herramientas de BI/visualización. Mi stack es desarrollo web con SQL (MySQL) para consultas de datos. Disposición para aprender.';
@@ -1647,8 +1647,8 @@ Responde ÚNICAMENTE con el número de índice de la opción correcta (0, 1, 2, 
     // contiene "técnico" por casualidad (ej: "Soporte técnico / infraestructura")
     // Usa ?? en vez de || para que value===0 no se trate como falsy
     else if (/nivel.*acad[eé]mico|nivel.*estudio|grado.*acad|escolaridad|formaci[oó]n.*acad|nivel.*educaci/i.test(q)
-             && options.some(o => /tecnol[oó]go|t[eé]cnico|profesional|universitario/i.test(o.label))) {
-      selectedValue = options.find(o => /tecnol[oó]go/i.test(o.label))?.value
+             && options.some(o => /tecn[oó]logo|t[eé]cnico|profesional|universitario/i.test(o.label))) {
+      selectedValue = options.find(o => /tecn[oó]logo/i.test(o.label))?.value
         ?? options.find(o => /t[eé]cnico/i.test(o.label))?.value;
       matchedRule = 'nivel-académico→tecnólogo';
     }
