@@ -331,7 +331,8 @@ function guessValue(name = '', placeholder = '', label = '', candidate = {}) {
   if (/a nombre de quien|propietario.*veh[ií]c|veh[ií]c.*nombre/i.test(k)) return 'No aplica.';
   // WhatsApp+location combined: return both; standalone whatsapp/phone → just phone
   if (/whatsapp.*(?:donde|ciudad|viv)|(?:donde|ciudad|viv).*whatsapp/i.test(k)) return `${candidate.phone || ''} — ${candidate.location || ''}`;
-  if (/phone|telef[oó]|celular|whatsapp|\bmobile\b|l[ií]nea.*tel|tel.*l[ií]nea/.test(k)) return candidate.phone || '';
+  if (/tel[eé]f.*(?:lugar|residencia|ciudad|direcci)|(?:lugar|residencia|ciudad|direcci).*tel[eé]f/i.test(k)) return `${candidate.phone || ''} — ${candidate.location || ''}`;
+  if (/phone|tel[eé]f|celular|whatsapp|\bmobile\b|l[ií]nea.*tel|tel.*l[ií]nea/.test(k)) return candidate.phone || '';
   if (/location|ciudad|city|direcci[oó]n|donde viv/.test(k)) return candidate.location || '';
   if (/linkedin/.test(k))                   return candidate.linkedin || '';
   if (/portfolio|website|sitio.?web|p[aá]gina.?web.?personal|url.?web/.test(k))  return candidate.portfolio_url || '';
@@ -860,6 +861,7 @@ function isDevJobUrl(url) {
     // Stack tecnológico incompatible en URL
     '-abap', 'sap-abap',     // ABAP = programador SAP — no aplica
     '-kotlin',               // desarrollador-kotlin → Android nativo — no aplica
+    '-android',              // developer-mobile-android → Android nativo — no aplica
     '-ios-', '-ios-swift', '-swift-', // iOS/Swift — no aplica
     'de-redes', 'redes-y-telecom', 'redes-teleco', // redes/telecomunicaciones — no aplica
     'lider-emprendedor',     // lider-emprendedor-desarrollador = ventas/emprendimiento
@@ -1154,7 +1156,7 @@ async function fillForm(page, candidate, cvContent) {
       }
       else if (/d[oó]nde vive|localidad|barrio|ubicaci[oó]n/.test(q))
         value = cvLocation;
-      else if (/n[uú]mero de contacto|whatsapp|telef[oó]|celular|l[ií]nea.*tel|tel.*l[ií]nea/.test(q))
+      else if (/n[uú]mero de contacto|whatsapp|tel[eé]f|celular|l[ií]nea.*tel|tel.*l[ií]nea/.test(q))
         value = candidate.phone || '';
       else if (/aspiraci[oó]n salarial|salario esperado|pretens/.test(q))
         value = 'Entre $2.000.000 y $3.000.000 COP mensuales.';
