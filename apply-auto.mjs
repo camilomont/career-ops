@@ -806,7 +806,9 @@ function keywordMatch(text, candidate) {
 
 // Filtra por perfil usando el slug de la URL (sin navegar — rápido)
 function isDevJobUrl(url) {
-  const slug = url.toLowerCase();
+  // Decodificar %C2%A0 y otros espacios URL-encoded, luego normalizar a guiones
+  // para que los patrones de hardReject funcionen igual con slugs no estándar
+  const slug = decodeURIComponent(url).toLowerCase().replace(/[\s\u00a0]+/g, '-');
   // Rechazar explícitamente roles que NO son desarrollo de software
   const hardReject = [
     'con-moto', 'moto-propia', 'canal-con-moto', '-vendedor', '-ventas-',
@@ -1586,6 +1588,13 @@ Responde ÚNICAMENTE con el número de índice de la opción correcta (0, 1, 2, 
     });
     const best = scored.reduce((a, b) => b.score > a.score ? b : a, scored[0]);
     if (best.score > 0) return best.option;
+
+    // 7b. MCQ técnica (≥4 opciones, sin match de skills): elegir la opción más larga.
+    //     En cuestionarios de trivia técnica los distractores son frases cortas/absurdas
+    //     y la respuesta correcta es la más detallada (mayor longitud de texto).
+    if (options.length >= 4) {
+      return options.reduce((a, b) => b.label.length > a.label.length ? b : a, options[0]);
+    }
 
     // 8. Sin match claro → conservador (honestidad por defecto) — SIEMPRE devuelve algo
     return minOption();
