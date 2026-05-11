@@ -849,6 +849,7 @@ function isDevJobUrl(url) {
     'programadora-quirurgic',    // variante femenino
     'programador-de-cirugia',    // programador de cirugía (sector salud)
     'programador-de-linea',      // programador de línea de producción (manufactura)
+    'programador-de-mantenimiento', // mantenimiento industrial/plantas — no es software
     'programador-de-servicios-y-condu', // programador conductor (no software)
     'programador-de-operaciones', // programador de operaciones logísticas — no es dev
     'radioperador',              // radio operador (no es programador de software)
@@ -858,6 +859,8 @@ function isDevJobUrl(url) {
     // Roles no-software que usan "programador" o "técnico"
     'maniobras-enel',            // programador de maniobras eléctricas (sector energético)
     '-de-la-produccion',         // técnico/tecnólogo de producción industrial
+    'auxiliar-pcm',              // planeación/mantenimiento (no desarrollo de software)
+    'pcm-o-programador',         // auxiliar pcm o programador de mantenimiento
     'logistica-o-progra',        // auxiliares de logística o programación de rutas/turnos
     'auxiliar-analista',         // auxiliar analista de soporte (no es rol dev)
     // Stack tecnológico incompatible en URL
@@ -1156,7 +1159,7 @@ async function fillForm(page, candidate, cvContent) {
         else
           value = 'Sí, estoy de acuerdo con las condiciones de la oferta.';
       }
-      else if (/d[oó]nde vive|localidad|barrio|ubicaci[oó]n/.test(q))
+      else if (/d[oó]nde vive|en qu[eé].*vive|vive actualmente|localidad|barrio|ubicaci[oó]n/.test(q))
         value = cvLocation;
       else if (/n[uú]mero de contacto|whatsapp|tel[eé]f|celular|l[ií]nea.*tel|tel.*l[ií]nea/.test(q))
         value = candidate.phone || '';
@@ -1222,6 +1225,8 @@ async function fillForm(page, candidate, cvContent) {
         value = 'Tengo conocimientos básicos de Docker para entornos de desarrollo local. Lo he usado para contenedores de bases de datos y servicios. Estoy en proceso de profundizar.';
       else if (/git|github|control de versiones|repositorio|versionamiento/i.test(q))
         value = 'Sí, uso Git y GitHub en todos mis proyectos. Manejo branches, commits semánticos, pull requests, merge y resolución de conflictos. Repositorio: github.com/camilomont';
+      else if (/portafolio|portfolio|sitio web|p[aá]gina web|web personal|link.*(github|portafolio)|github.*(perfil|link)/i.test(q))
+        value = 'https://github.com/camilomont';
       else if (/escala.*[1-5]|califica.*nivel|puntúa|[0-9].*siendo.*[0-9]|de [0-9]+ a [0-9]+|[0-9]+ al [0-9]+|cuanto manejas|cuánto manejas/.test(q))
         value = '3';
       else if (/angular/i.test(q))
